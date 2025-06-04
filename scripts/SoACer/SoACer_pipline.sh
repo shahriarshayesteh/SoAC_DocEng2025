@@ -11,4 +11,4 @@ fi
 INPUT=$1
 OUTPUT_DIR=$2
 
-python3 main.py --input "$INPUT" --output_dir "$OUTPUT_DIR"
+python3 src/inference/SoACer_pipeline.py --input "$INPUT" --output_dir "$OUTPUT_DIR"

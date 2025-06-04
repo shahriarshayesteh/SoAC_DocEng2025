@@ -31,10 +31,10 @@ LEARNING_RATE=1e-4
 VAL_INTERVAL=1
 
 # Root folder containing all embedding subdirectories
-EMBEDDINGS_ROOT="/data/sxs7285/Porjects_code/thesis/DocEng/classification/embeddings"
+EMBEDDINGS_ROOT="classification/embeddings"
 
 # Root folder where training results, metrics, and confusion matrices will be saved
-RESULTS_ROOT="/data/sxs7285/Porjects_code/thesis/DocEng/classification/results"
+RESULTS_ROOT="classification/results"
 
 # W&B project name (for organizing multiple runs)
 WANDB_PROJECT="SoAC"
@@ -49,7 +49,7 @@ WANDB_ENTITY="your_wandb_entity"
 LOG_DIR="./wandb_logs"
 
 # === EXECUTION ===
-python3 /data/sxs7285/Porjects_code/thesis/DocEng/SoAC-DocEng/src/SoACer_training/train_single_model.py \
+python3 src/SoACer_training/train_single_model.py \
   --model_variant "$MODEL_VARIANT" \
   --embed_size "$EMBED_SIZE" \
   --common_dim "$COMMON_DIM" \

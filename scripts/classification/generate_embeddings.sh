@@ -9,14 +9,14 @@ set -u
 # --------- DEFAULT CONFIGS (overridable) ---------
 MODEL_ID="${MODEL_ID:-meta-llama/Meta-Llama-3-8B}"
 TASK_NAME="${TASK_NAME:-model_embeddings}"
-OUTPUT_DIR="${OUTPUT_DIR:-/data/sxs7285/Porjects_code/thesis/DocEng/SoAC-DocEng/src/SoACer_training/embeddings/model_embeddings}"
+OUTPUT_DIR="${OUTPUT_DIR:-embeddings/model_embeddings}"
 MAX_LEN="${MAX_LEN:-1024}"
 BATCH_SIZE="${BATCH_SIZE:-8}"
 # --------------------------------------------------
 
 echo "[INFO] Generating embeddings using $MODEL_ID..."
 
-python3 /data/sxs7285/Porjects_code/thesis/DocEng/SoAC-DocEng/src/SoACer_training/embeddings/generate_embeddings.py \
+python3 src/SoACer_training/embeddings/generate_embeddings.py \
   --model_id "$MODEL_ID" \
   --task "$TASK_NAME" \
   --output_base "$OUTPUT_DIR" \
