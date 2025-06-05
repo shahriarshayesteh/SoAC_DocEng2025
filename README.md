@@ -72,6 +72,33 @@ python src/inference/SoACer_pipeline.py \
 
 Below are three main experiment workflows. Each section assumes you have a `scripts/` folder with corresponding helper scripts; adjust paths as needed.
 
+### Preparation
+
+Before running any experiments, clone the repository and install the required packages:
+
+```bash
+# Clone the repository
+git clone https://github.com/your-username/SoAC-SoACer.git
+cd SoAC-SoACer
+
+# Create a Python virtual environment (optional but recommended)
+python3 -m venv venv
+source venv/bin/activate
+
+# Install dependencies
+pip install --upgrade pip
+pip install -r requirements.txt
+```
+
+> **Note:** If you prefer Conda, you can create and activate an environment as follows:
+>
+> ```bash
+> conda create -n soacer_env python=3.8 -y
+> conda activate soacer_env
+> pip install --upgrade pip
+> pip install -r requirements.txt
+> ```
+
 ### 1. Summary Generation
 
 This step produces extractive summaries for every website in SoAC (used later for training/inference). By default, we extract 20 sentences per document.
