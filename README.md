@@ -48,13 +48,13 @@ Here's the **updated Inference section** for your `README.md`, incorporating bot
 
 ---
 
-## Inference
+### Inference
 
 The SoACer framework supports both **single URL prediction** and **batch asynchronous prediction** for sector classification.
 
 ---
 
-### Single URL Prediction
+#### Single URL Prediction
 
 Run inference on a single website URL using the synchronous pipeline:
 
@@ -64,7 +64,7 @@ python src/inference/SoACer_pipeline.py \
   --output_dir results/
 ```
 
-#### What This Does:
+##### What This Does:
 
 1. Crawls the provided URL (depth-limited).
 2. Extracts main textual content using Boilerpipe.
@@ -79,7 +79,7 @@ python src/inference/SoACer_pipeline.py \
 
 ---
 
-### Batch Async Prediction
+#### Batch Async Prediction
 
 To process multiple URLs asynchronously, use the async script:
 
