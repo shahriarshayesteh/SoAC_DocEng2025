@@ -7,9 +7,9 @@ One approach to understanding the vastness and complexity of the web is to categ
 
 1. Fetches website information
 2. Uses extractive summarization (LexRank) to condense noisy content
-3. Generates lightweight LLM embeddings (Llama3-8B) followed by a classification head to predict each website’s sector .
+3. Generates lightweight LLM embeddings (Llama3-8B) followed by a classification head to predict each website’s sector.
 
-Through extensive experiments (including ablation studies and error analysis), SoACer achieves **72.6% overall accuracy** on SoAC, demonstrating that extractive summarization not only reduces computational overhead but also improves classification performance .
+Through extensive experiments (including ablation studies and error analysis), SoACer achieves **72.6% overall accuracy** on SoAC.
 
 ---
 
@@ -53,7 +53,7 @@ SoACer is a three-stage pipeline (Pre-processing → Inference → Post-processi
 
 2. **Summarization (LexRank)**
 
-   * By default, we extract the top 20 sentences per website (≈ 765 tokens), which empirically yields the best trade-off between accuracy and efficiency .
+   * By default, we extract the top 20 sentences per website (≈ 765 tokens), which empirically yields the best trade-off between accuracy and efficiency.
 
 ### Inference
 
@@ -74,19 +74,8 @@ python src/inference/SoACer_pipeline.py \
      * Top-1 sector + confidence
      * All sector confidence scores
      * Generated summary
-     * Raw scraped text
 
 > **Note:** Adjust `--input_type {url,text}` and point `--input_value` accordingly.
-
-### Post-processing
-
-* The inference script outputs a JSON (or CSV) where each entry includes:
-
-  * `url` (or identifier)
-  * `predicted_sector`
-  * `confidence_scores` (dict of all 10 sectors)
-  * `summary_text`
-  * `raw_text`
 
 ---
 
@@ -109,7 +98,7 @@ bash scripts/summary/generate_summary.sh \
 * `--output_dir`: directory where summaries (one JSON per site) are saved
 * `--sentences_count`: number of sentences to extract (e.g., 2, 4, 10, 15, 20, etc.)
 
-> To test different lengths (e.g., sc2, sc4, sc10, sc15, sc20, sc25, sc30), modify `--sentences_count`. The best validation performance was at 20 sentences (≈ 72.3 % accuracy) .
+> To test different lengths (e.g., sc2, sc4, sc10, sc15, sc20, sc25, sc30), modify `--sentences_count`. 
 
 ### 2. SoACer Training
 
@@ -131,7 +120,7 @@ bash scripts/classification/train_classifier.sh \
   --dropout 0.3
 ```
 
-Upon completion, the best-checkpoint (lowest validation loss) is saved under `models/soacer_20sent/`. The test accuracy will be close to **72.6 %** when using Llama3-8B embeddings .
+Upon completion, the best checkpoint (lowest validation loss) is saved under `models/soacer_20sent/`.
 
 ### 3. Ablation Study (Full-text vs. Summary)
 
@@ -154,30 +143,6 @@ bash scripts/ablation/run_ablation.sh \
   --test_data data/summaries/test.jsonl \
   --model_output_dir models/ablation_summary/
 ```
-
-After training, compare metrics (accuracy, balanced accuracy, weighted F1, etc.). In our experiments, summary-based outperformed full-text by:
-
-* * 3.5 % overall accuracy
-* * 3.2 % balanced accuracy
-* * 3.8 % weighted F1 .
-
----
-
-## Hyperparameters & Implementation Details
-
-All code is implemented in Python 3 (≥ 3.8) with PyTorch 2.x and Hugging Face Transformers. We recommend using a machine with ≥ 1 GPU (≥ 12 GB VRAM) for training:
-
-* **LexRank summarization**: uses a thresholded cosine-similarity graph and PageRank (via the `lexrank` package).
-* **Embedding layer**: Meta-Llama-3-8B (frozen). We extract mean-pooled embeddings from the last hidden layer.
-* **Classification head** (MLP):
-
-  1. (optional) Linear compression → BatchNorm → LeakyReLU → Dropout 0.3
-  2. FC layer (512 units) → BatchNorm → LeakyReLU → Dropout 0.3
-  3. FC layer (256 units) → BatchNorm → LeakyReLU → Dropout 0.3
-  4. Final linear → 10-way softmax .
-
-Detailed hyperparameters are in `scripts/classification/train_classifier.sh` (and appendix of the paper).
-
 ---
 
 ## Citation
