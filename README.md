@@ -131,7 +131,7 @@ pip install -r requirements.txt
 > pip install -r requirements.txt
 > ```
 
-### 1. Summary Generation
+### Summary Generation
 
 This step produces extractive summaries for every website in SoAC (used later for training/inference). By default, we extract 20 sentences per document.
 
@@ -145,11 +145,11 @@ Here's an updated **Training Section** for your README to clearly reflect the **
 
 ---
 
-## SoACer Training
+### SoACer Training
 
 To train the **SoACer** classifier, follow the **two-step pipeline**: first generate sentence embeddings using an LLM, then train the classification head on these embeddings.
 
-### Step 1: Generate Embeddings
+#### Step 1: Generate Embeddings
 
 We use a frozen LLM (default: LLaMA3-8B) to embed LexRank summaries for each website. You can run the embedding generation with default or overridden parameters.
 
@@ -171,7 +171,7 @@ This will generate embeddings for the train/validation/test splits and save them
 
 ---
 
-### Step 2: Train Classifier
+#### Step 2: Train Classifier
 
 After embeddings are generated, train a **classification head** (a 2-layer MLP) on top of them.
 
@@ -200,11 +200,11 @@ Here's the **updated Ablation Study section** for your `README.md`, reflecting t
 
 ---
 
-## Ablation Study: Full-Text vs. Summary-Based Classification
+### Ablation Study: Full-Text vs. Summary-Based Classification
 
 To assess the impact of extractive summarization, we compare the SoACer framework's performance using full-text content vs. summary-based input. This experiment evaluates classification accuracy, efficiency, and robustness across input types using different LLM embeddings.
 
-### Step 1: Generate Embeddings
+#### Step 1: Generate Embeddings
 
 Use the following script to generate embeddings for both full-text and summary-based datasets using any LLM (e.g., LLaMA3, DeepSeek, etc.).
 
@@ -212,7 +212,7 @@ Use the following script to generate embeddings for both full-text and summary-b
 bash scripts/ablation/run_embedding.sh <MODEL_ID> [BATCH_SIZE] [MAX_LEN] [TASK_NAME] [OUTPUT_DIR]
 ```
 
-#### Example:
+##### Example:
 
 ```bash
 bash scripts/ablation/run_embedding.sh meta-llama/Meta-Llama-3-8B 8 1024 fulltext_embeddings ablation/embeddings
@@ -228,7 +228,7 @@ Repeat the process for both summary and full-text variants if desired (e.g., dif
 
 ---
 
-### Step 2: Run Ablation Training and Evaluation
+#### Step 2: Run Ablation Training and Evaluation
 
 Use the `run_ablation.sh` script to train and evaluate classifiers on the generated embeddings:
 
@@ -241,7 +241,7 @@ bash scripts/ablation/run_ablation.sh <MODEL_NAME> [EMBED_SIZE] [COMMON_DIM] [SE
 * `COMMON_DIM`: Projection size before classification (e.g., 512 or 2048)
 * `SEEDS`: (Optional) Comma-separated list or a single random seed (default: 12)
 
-#### Example:
+##### Example:
 
 ```bash
 bash scripts/ablation/run_ablation.sh Llama-3.2-1B 2048 512 12
