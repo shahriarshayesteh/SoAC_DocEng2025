@@ -48,9 +48,8 @@ SoACer is a three-stage pipeline (Pre-processing → Inference → Post-processi
 
 ```bash
 python src/inference/SoACer_pipeline.py \
-  --input_type url \
-  --input_value "https://example.com" \
-  --output_file results.json
+  --input "https://example.com" \
+  --output_dir ./results
 ```
 
 * This script will:
@@ -63,8 +62,6 @@ python src/inference/SoACer_pipeline.py \
      * Top-1 sector + confidence
      * All sector confidence scores
      * Generated summary
-
-> **Note:** Adjust `--input_type {url,text}` and point `--input_value` accordingly.
 
 ---
 
