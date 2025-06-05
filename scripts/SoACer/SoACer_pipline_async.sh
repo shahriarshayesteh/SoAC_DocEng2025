@@ -10,4 +10,4 @@ fi
 INPUT="$1"
 OUTPUT="$2"
 
-python3 main.py --input_txt "$INPUT" --output_dir "$OUTPUT"
+python3 src/inference/SoACer_pipeline_async.py --input_txt "$INPUT" --output_dir "$OUTPUT"

@@ -58,7 +58,7 @@ SoACer is a three-stage pipeline (Pre-processing → Inference → Post-processi
 ### Inference
 
 ```bash
-python src/soacer_inference.py \
+python src/inference/SoACer_pipeline.py \
   --input_type url \
   --input_value "https://example.com" \
   --output_file results.json
@@ -99,7 +99,7 @@ Below are three main experiment workflows. Each section assumes you have a `scri
 This step produces extractive summaries for every website in SoAC (used later for training/inference). By default, we extract 20 sentences per document.
 
 ```bash
-bash scripts/generate_summaries.sh \
+bash scripts/summary/generate_summary.sh \
   --input_dir data/raw_html/ \
   --output_dir data/summaries/ \
   --sentences_count 20
@@ -113,25 +113,24 @@ bash scripts/generate_summaries.sh \
 
 ### 2. SoACer Training
 
-Train SoACer on the summarized corpus. By default, the hyperparameters are:
-
-* **Epochs**: 15
-* **Batch size**: 8
-* **Learning rate**: 2 × 10⁻⁴
-* **Dropout**: 0.3&#x20;
+Training the classifier requires sentence embeddings. Generate them first and then train:
 
 ```bash
-bash scripts/train_soacer.sh \
-  --train_data data/summaries/train.jsonl \
-  --valid_data data/summaries/validation.jsonl \
-  --model_output_dir models/soacer_20sent/ \
-  --epochs 15 \
-  --batch_size 8 \
-  --learning_rate 2e-4 \
-  --dropout 0.3
+# 1) Generate embeddings (override variables if needed)
+bash scripts/classification/generate_embeddings.sh
+
+# 2) Train the classifier using the generated embeddings
+bash scripts/classification/train_classifier.sh
 ```
 
-Upon completion, the best-checkpoint (lowest validation loss) is saved under `models/soacer_20sent/`. The test accuracy will be close to **72.6 %** when using Llama3-8B embeddings .
+The default hyperparameters inside `train_classifier.sh` are:
+
+* **Epochs**: 10
+* **Batch size**: 32
+* **Learning rate**: 1 × 10⁻⁴
+* **Dropout**: 0.3
+
+Override these variables by exporting them before running the script. The best checkpoint is saved under `classification/results/`.
 
 ### 3. Ablation Study (Full-text vs. Summary)
 
@@ -139,7 +138,7 @@ To compare full-text classification (subsampled to ≤ 7,000 tokens) versus summ
 
 ```bash
 # Full-text variant (using Llama-3.2-1B, subsampled dataset)
-bash scripts/run_ablation.sh \
+bash scripts/ablation/run_ablation.sh \
   --mode full_text \
   --train_data data/full_text/train_subsampled.jsonl \
   --valid_data data/full_text/valid_subsampled.jsonl \
@@ -147,7 +146,7 @@ bash scripts/run_ablation.sh \
   --model_output_dir models/ablation_fulltext/
 
 # Summary-based variant (same Llama-3.2-1B, using 20-sentence summaries)
-bash scripts/run_ablation.sh \
+bash scripts/ablation/run_ablation.sh \
   --mode summary \
   --train_data data/summaries/train.jsonl \
   --valid_data data/summaries/validation.jsonl \
@@ -176,7 +175,7 @@ All code is implemented in Python 3 (≥ 3.8) with PyTorch 2.x and Hugging Face 
   3. FC layer (256 units) → BatchNorm → LeakyReLU → Dropout 0.3
   4. Final linear → 10-way softmax .
 
-Detailed hyperparameters are in `scripts/train_soacer.sh` (and appendix of the paper).
+Detailed hyperparameters are in `scripts/classification/train_classifier.sh` (and appendix of the paper).
 
 ---
 

@@ -9,10 +9,10 @@ MODEL_ID=${1:-"meta-llama/Meta-Llama-3-8B"}
 BATCH_SIZE=${2:-1}
 MAX_LEN=${3:-1024}
 TASK_NAME=${4:-"model_embeddings"}
-OUTPUT_BASE=${5:-"/data/soac/embeddings"}
+OUTPUT_BASE=${5:-"ablation/embeddings"}
 
 PYTHON="python3"
-SCRIPT_PATH="/data/sxs7285/Porjects_code/thesis/DocEng/SoAC-DocEng/src/training/embedding_extractor.py"
+SCRIPT_PATH="src/Ablation/embedding/ablation_emb.py"
 
 echo "[EMBEDDING] Running embedding extraction..."
 echo "Model: $MODEL_ID"

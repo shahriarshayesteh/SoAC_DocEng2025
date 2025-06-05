@@ -22,11 +22,11 @@ DEVICE="cuda:0"
 # ───────────────────────────────────────────────
 # Paths
 # ───────────────────────────────────────────────
-TRAIN_TEMPLATE="/data/sxs7285/Porjects_code/thesis/SoAC/websector/${MODEL_NAME}_{}"
-VAL_TEST_DIR="/data/sxs7285/Porjects_code/thesis/SoAC/websector/${MODEL_NAME}_12"
-RESULTS_BASE="/data/sxs7285/Porjects_code/thesis/SoAC/ablation_results/${MODEL_NAME}"
+TRAIN_TEMPLATE="data/websector/${MODEL_NAME}_{}"
+VAL_TEST_DIR="data/websector/${MODEL_NAME}_12"
+RESULTS_BASE="ablation_results/${MODEL_NAME}"
 
-PYTHON_SCRIPT="/data/sxs7285/Porjects_code/thesis/DocEng/SoAC-DocEng/src/training/run_ablation_train_eval.py"
+PYTHON_SCRIPT="src/Ablation/run_ablation_train_eval.py"
 
 echo "[ABLATION] Running seed(s): $SEEDS for $MODEL_NAME"
 
