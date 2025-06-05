@@ -7,9 +7,9 @@ One approach to understanding the vastness and complexity of the web is to categ
 
 1. Fetches website information
 2. Uses extractive summarization (LexRank) to condense noisy content
-3. Generates lightweight LLM embeddings (Llama3-8B) followed by a classification head to predict each website’s sector .
+3. Generates lightweight LLM embeddings (Llama3-8B) followed by a classification head to predict each website’s sector.
 
-Through extensive experiments (including ablation studies and error analysis), SoACer achieves **72.6% overall accuracy** on SoAC, demonstrating that extractive summarization not only reduces computational overhead but also improves classification performance .
+Through extensive experiments (including ablation studies and error analysis), SoACer achieves **72.6% overall accuracy** on SoAC.
 
 ---
 
@@ -44,24 +44,12 @@ SoACer is a three-stage pipeline (Pre-processing → Inference → Post-processi
 </p>
 
 
-### Pre-processing
-
-1. **Raw text or URL**
-
-   * If you supply raw text, it directly goes to summarization.
-   * If you supply a website URL, SoACer crawls the landing page (plus depth-1 internal links) and extracts boilerplate-free content using Boilerpipe.
-
-2. **Summarization (LexRank)**
-
-   * By default, we extract the top 20 sentences per website (≈ 765 tokens), which empirically yields the best trade-off between accuracy and efficiency .
-
 ### Inference
 
 ```bash
 python src/inference/SoACer_pipeline.py \
-  --input_type url \
-  --input_value "https://example.com" \
-  --output_file results.json
+  --input "https://example.com" \
+  --output_dir results/
 ```
 
 * This script will:
@@ -74,19 +62,6 @@ python src/inference/SoACer_pipeline.py \
      * Top-1 sector + confidence
      * All sector confidence scores
      * Generated summary
-     * Raw scraped text
-
-> **Note:** Adjust `--input_type {url,text}` and point `--input_value` accordingly.
-
-### Post-processing
-
-* The inference script outputs a JSON (or CSV) where each entry includes:
-
-  * `url` (or identifier)
-  * `predicted_sector`
-  * `confidence_scores` (dict of all 10 sectors)
-  * `summary_text`
-  * `raw_text`
 
 ---
 
@@ -94,89 +69,72 @@ python src/inference/SoACer_pipeline.py \
 
 Below are three main experiment workflows. Each section assumes you have a `scripts/` folder with corresponding helper scripts; adjust paths as needed.
 
+### Preparation
+
+Before running any experiments, clone the repository and install the required packages:
+
+```bash
+# Clone the repository
+git clone https://github.com/your-username/SoAC-SoACer.git
+cd SoAC-SoACer
+
+# Create a Python virtual environment (optional but recommended)
+python3 -m venv venv
+source venv/bin/activate
+
+# Install dependencies
+pip install --upgrade pip
+pip install -r requirements.txt
+```
+
+> **Note:** If you prefer Conda, you can create and activate an environment as follows:
+>
+> ```bash
+> conda create -n soacer_env python=3.8 -y
+> conda activate soacer_env
+> pip install --upgrade pip
+> pip install -r requirements.txt
+> ```
+
 ### 1. Summary Generation
 
 This step produces extractive summaries for every website in SoAC (used later for training/inference). By default, we extract 20 sentences per document.
 
 ```bash
-bash scripts/summary/generate_summary.sh \
-  --input_dir data/raw_html/ \
-  --output_dir data/summaries/ \
-  --sentences_count 20
+bash scripts/summary/generate_summary.sh 20 12 data/summaries/
 ```
 
-* `--input_dir`: directory of raw-HTML files (or plain-text versions) for each website
-* `--output_dir`: directory where summaries (one JSON per site) are saved
-* `--sentences_count`: number of sentences to extract (e.g., 2, 4, 10, 15, 20, etc.)
-
-> To test different lengths (e.g., sc2, sc4, sc10, sc15, sc20, sc25, sc30), modify `--sentences_count`. The best validation performance was at 20 sentences (≈ 72.3 % accuracy) .
+This script downloads SoAC from Hugging Face if needed, then generates 20-sentence summaries using 12 workers. The summaries are saved under `data/summaries/`. 
 
 ### 2. SoACer Training
 
-Training the classifier requires sentence embeddings. Generate them first and then train:
+Train SoACer on the summarized corpus. By default, the hyperparameters are:
+
+* **Epochs**: 15
+* **Batch size**: 8
+* **Learning rate**: 2 × 10⁻⁴
+* **Dropout**: 0.3&#x20;
 
 ```bash
-# 1) Generate embeddings (override variables if needed)
-bash scripts/classification/generate_embeddings.sh
-
-# 2) Train the classifier using the generated embeddings
-bash scripts/classification/train_classifier.sh
+bash scripts/classification/train_classifier.sh \
+  --train_data data/summaries/train.jsonl \
+  --valid_data data/summaries/validation.jsonl \
+  --model_output_dir models/soacer_20sent/ \
+  --epochs 15 \
+  --batch_size 8 \
+  --learning_rate 2e-4 \
+  --dropout 0.3
 ```
 
-The default hyperparameters inside `train_classifier.sh` are:
-
-* **Epochs**: 10
-* **Batch size**: 32
-* **Learning rate**: 1 × 10⁻⁴
-* **Dropout**: 0.3
-
-Override these variables by exporting them before running the script. The best checkpoint is saved under `classification/results/`.
+Upon completion, the best checkpoint (lowest validation loss) is saved under `models/soacer_20sent/`.
 
 ### 3. Ablation Study (Full-text vs. Summary)
 
-To compare full-text classification (subsampled to ≤ 7,000 tokens) versus summary-based (20 sentences), run:
+Run the ablation script specifying the model name and optional embedding size, projection dimension, and random seeds:
 
 ```bash
-# Full-text variant (using Llama-3.2-1B, subsampled dataset)
-bash scripts/ablation/run_ablation.sh \
-  --mode full_text \
-  --train_data data/full_text/train_subsampled.jsonl \
-  --valid_data data/full_text/valid_subsampled.jsonl \
-  --test_data data/full_text/test_subsampled.jsonl \
-  --model_output_dir models/ablation_fulltext/
-
-# Summary-based variant (same Llama-3.2-1B, using 20-sentence summaries)
-bash scripts/ablation/run_ablation.sh \
-  --mode summary \
-  --train_data data/summaries/train.jsonl \
-  --valid_data data/summaries/validation.jsonl \
-  --test_data data/summaries/test.jsonl \
-  --model_output_dir models/ablation_summary/
+bash scripts/ablation/run_ablation.sh <MODEL_NAME> [EMBED_SIZE] [COMMON_DIM] [SEEDS]
 ```
-
-After training, compare metrics (accuracy, balanced accuracy, weighted F1, etc.). In our experiments, summary-based outperformed full-text by:
-
-* * 3.5 % overall accuracy
-* * 3.2 % balanced accuracy
-* * 3.8 % weighted F1 .
-
----
-
-## Hyperparameters & Implementation Details
-
-All code is implemented in Python 3 (≥ 3.8) with PyTorch 2.x and Hugging Face Transformers. We recommend using a machine with ≥ 1 GPU (≥ 12 GB VRAM) for training:
-
-* **LexRank summarization**: uses a thresholded cosine-similarity graph and PageRank (via the `lexrank` package).
-* **Embedding layer**: Meta-Llama-3-8B (frozen). We extract mean-pooled embeddings from the last hidden layer.
-* **Classification head** (MLP):
-
-  1. (optional) Linear compression → BatchNorm → LeakyReLU → Dropout 0.3
-  2. FC layer (512 units) → BatchNorm → LeakyReLU → Dropout 0.3
-  3. FC layer (256 units) → BatchNorm → LeakyReLU → Dropout 0.3
-  4. Final linear → 10-way softmax .
-
-Detailed hyperparameters are in `scripts/classification/train_classifier.sh` (and appendix of the paper).
-
 ---
 
 ## Citation
