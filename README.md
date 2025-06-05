@@ -49,7 +49,7 @@ SoACer is a three-stage pipeline (Pre-processing → Inference → Post-processi
 ```bash
 python src/inference/SoACer_pipeline.py \
   --input "https://example.com" \
-  --output_dir ./results
+  --output_dir results/
 ```
 
 * This script will:
@@ -101,17 +101,10 @@ pip install -r requirements.txt
 This step produces extractive summaries for every website in SoAC (used later for training/inference). By default, we extract 20 sentences per document.
 
 ```bash
-bash scripts/summary/generate_summary.sh \
-  --input_dir data/raw_html/ \
-  --output_dir data/summaries/ \
-  --sentences_count 20
+bash scripts/summary/generate_summary.sh 20 12 data/summaries/
 ```
 
-* `--input_dir`: directory of raw-HTML files (or plain-text versions) for each website
-* `--output_dir`: directory where summaries (one JSON per site) are saved
-* `--sentences_count`: number of sentences to extract (e.g., 2, 4, 10, 15, 20, etc.)
-
-> To test different lengths (e.g., sc2, sc4, sc10, sc15, sc20, sc25, sc30), modify `--sentences_count`. 
+This script downloads SoAC from Hugging Face if needed, then generates 20-sentence summaries using 12 workers. The summaries are saved under `data/summaries/`. 
 
 ### 2. SoACer Training
 
@@ -137,24 +130,10 @@ Upon completion, the best checkpoint (lowest validation loss) is saved under `mo
 
 ### 3. Ablation Study (Full-text vs. Summary)
 
-To compare full-text classification (subsampled to ≤ 7,000 tokens) versus summary-based (20 sentences), run:
+Run the ablation script specifying the model name and optional embedding size, projection dimension, and random seeds:
 
 ```bash
-# Full-text variant (using Llama-3.2-1B, subsampled dataset)
-bash scripts/ablation/run_ablation.sh \
-  --mode full_text \
-  --train_data data/full_text/train_subsampled.jsonl \
-  --valid_data data/full_text/valid_subsampled.jsonl \
-  --test_data data/full_text/test_subsampled.jsonl \
-  --model_output_dir models/ablation_fulltext/
-
-# Summary-based variant (same Llama-3.2-1B, using 20-sentence summaries)
-bash scripts/ablation/run_ablation.sh \
-  --mode summary \
-  --train_data data/summaries/train.jsonl \
-  --valid_data data/summaries/validation.jsonl \
-  --test_data data/summaries/test.jsonl \
-  --model_output_dir models/ablation_summary/
+bash scripts/ablation/run_ablation.sh <MODEL_NAME> [EMBED_SIZE] [COMMON_DIM] [SEEDS]
 ```
 ---
 
