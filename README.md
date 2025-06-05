@@ -44,7 +44,19 @@ SoACer is a three-stage pipeline (Pre-processing → Inference → Post-processi
 </p>
 
 
-### Inference
+Here's the **updated Inference section** for your `README.md`, incorporating both the **single URL sync pipeline** and the **batch async pipeline**:
+
+---
+
+## Inference
+
+The SoACer framework supports both **single URL prediction** and **batch asynchronous prediction** for sector classification.
+
+---
+
+### Single URL Prediction
+
+Run inference on a single website URL using the synchronous pipeline:
 
 ```bash
 python src/inference/SoACer_pipeline.py \
@@ -52,16 +64,39 @@ python src/inference/SoACer_pipeline.py \
   --output_dir results/
 ```
 
-* This script will:
+#### What This Does:
 
-  1. Crawl the URL, extract text, and run LexRank.
-  2. Compute a mean-pooled embedding from Llama3-8B.
-  3. Pass the embedding through a fine-tuned MLP head to predict one of 10 sectors.
-  4. Save a JSON containing:
+1. Crawls the provided URL (depth-limited).
+2. Extracts main textual content using Boilerpipe.
+3. Applies LexRank to summarize the content.
+4. Computes a mean-pooled embedding using LLaMA3-8B.
+5. Passes the embedding through the fine-tuned classification head.
+6. Saves a `.json` file to `results/` containing:
 
-     * Top-1 sector + confidence
-     * All sector confidence scores
-     * Generated summary
+   * **Top-1 predicted sector** + confidence
+   * **Confidence scores** for all 10 sectors
+   * **Extracted summary** used for classification
+
+---
+
+### Batch Async Prediction
+
+To process multiple URLs asynchronously, use the async script:
+
+```bash
+bash scripts/SoACer/SoACer_pipeline_async.sh input_urls.txt output_dir/
+```
+
+* `input_urls.txt` should contain one URL per line.
+* `output_dir/` is where all prediction results will be saved.
+
+Each URL will generate a JSON file (similar to the single-mode output), stored in the output directory with the format:
+
+```
+output_dir/<url_hostname>.json
+```
+
+This script uses `src/inference/SoACer_pipeline_async.py` and supports concurrent crawling and classification for faster batch processing.
 
 ---
 
