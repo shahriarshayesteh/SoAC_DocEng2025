@@ -161,14 +161,72 @@ By default, the training uses:
 The best model (lowest validation loss) is saved automatically. Training logs and evaluation metrics are recorded under `wandb_logs/`.
 
 
+Here's the **updated Ablation Study section** for your `README.md`, reflecting the use of the new `run_embedding.sh` and `run_ablation.sh` scripts for full-text vs. summary evaluation:
 
-### 3. Ablation Study (Full-text vs. Summary)
+---
 
-Run the ablation script specifying the model name and optional embedding size, projection dimension, and random seeds:
+## Ablation Study: Full-Text vs. Summary-Based Classification
+
+To assess the impact of extractive summarization, we compare the SoACer framework's performance using full-text content vs. summary-based input. This experiment evaluates classification accuracy, efficiency, and robustness across input types using different LLM embeddings.
+
+### Step 1: Generate Embeddings
+
+Use the following script to generate embeddings for both full-text and summary-based datasets using any LLM (e.g., LLaMA3, DeepSeek, etc.).
+
+```bash
+bash scripts/ablation/run_embedding.sh <MODEL_ID> [BATCH_SIZE] [MAX_LEN] [TASK_NAME] [OUTPUT_DIR]
+```
+
+#### Example:
+
+```bash
+bash scripts/ablation/run_embedding.sh meta-llama/Meta-Llama-3-8B 8 1024 fulltext_embeddings ablation/embeddings
+```
+
+This will create embeddings under:
+
+```
+ablation/embeddings/fulltext_embeddings/Meta-Llama-3-8B/dataset_tensor/
+```
+
+Repeat the process for both summary and full-text variants if desired (e.g., different `TASK_NAME`s like `summary_embeddings`, `fulltext_embeddings`, etc.).
+
+---
+
+### Step 2: Run Ablation Training and Evaluation
+
+Use the `run_ablation.sh` script to train and evaluate classifiers on the generated embeddings:
 
 ```bash
 bash scripts/ablation/run_ablation.sh <MODEL_NAME> [EMBED_SIZE] [COMMON_DIM] [SEEDS]
 ```
+
+* `MODEL_NAME`: Folder name used under `data/websector/` (e.g., `Llama-3.2-1B`)
+* `EMBED_SIZE`: Embedding vector size (e.g., 2048)
+* `COMMON_DIM`: Projection size before classification (e.g., 512 or 2048)
+* `SEEDS`: (Optional) Comma-separated list or a single random seed (default: 12)
+
+#### Example:
+
+```bash
+bash scripts/ablation/run_ablation.sh Llama-3.2-1B 2048 512 12
+```
+
+This command will:
+
+* Load embeddings from `data/websector/Llama-3.2-1B/12/dataset_tensor/`
+* Train a classifier and log results to `ablation_results/Llama-3.2-1B/`
+
+---
+
+### Output
+
+The scripts will output:
+
+* Classification metrics (accuracy, precision, recall, F1)
+* Confusion matrices and performance logs per seed
+* Best model checkpoint (optional depending on config)
+
 ---
 
 ## Citation
