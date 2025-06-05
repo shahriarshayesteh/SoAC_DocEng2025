@@ -219,16 +219,6 @@ This command will:
 
 ---
 
-### Output
-
-The scripts will output:
-
-* Classification metrics (accuracy, precision, recall, F1)
-* Confusion matrices and performance logs per seed
-* Best model checkpoint (optional depending on config)
-
----
-
 ## Citation
 
 If you use SoAC or SoACer in your work, please cite:
