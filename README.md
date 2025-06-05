@@ -44,17 +44,6 @@ SoACer is a three-stage pipeline (Pre-processing → Inference → Post-processi
 </p>
 
 
-### Pre-processing
-
-1. **Raw text or URL**
-
-   * If you supply raw text, it directly goes to summarization.
-   * If you supply a website URL, SoACer crawls the landing page (plus depth-1 internal links) and extracts boilerplate-free content using Boilerpipe.
-
-2. **Summarization (LexRank)**
-
-   * By default, we extract the top 20 sentences per website (≈ 765 tokens), which empirically yields the best trade-off between accuracy and efficiency.
-
 ### Inference
 
 ```bash
