@@ -106,27 +106,61 @@ bash scripts/summary/generate_summary.sh 20 12 data/summaries/
 
 This script downloads SoAC from Hugging Face if needed, then generates 20-sentence summaries using 12 workers. The summaries are saved under `data/summaries/`. 
 
-### 2. SoACer Training
+Here's an updated **Training Section** for your README to clearly reflect the **two-step SoACer training process**, based on the scripts `generate_embeddings.sh` and `train_classifier.sh`, and aligned with the methodology outlined in your DocEng paper:
 
-Train SoACer on the summarized corpus. By default, the hyperparameters are:
+---
 
-* **Epochs**: 15
-* **Batch size**: 8
-* **Learning rate**: 2 × 10⁻⁴
-* **Dropout**: 0.3&#x20;
+## SoACer Training
+
+To train the **SoACer** classifier, follow the **two-step pipeline**: first generate sentence embeddings using an LLM, then train the classification head on these embeddings.
+
+### Step 1: Generate Embeddings
+
+We use a frozen LLM (default: LLaMA3-8B) to embed LexRank summaries for each website. You can run the embedding generation with default or overridden parameters.
 
 ```bash
-bash scripts/classification/train_classifier.sh \
-  --train_data data/summaries/train.jsonl \
-  --valid_data data/summaries/validation.jsonl \
-  --model_output_dir models/soacer_20sent/ \
-  --epochs 15 \
-  --batch_size 8 \
-  --learning_rate 2e-4 \
-  --dropout 0.3
+bash scripts/classification/generate_embeddings.sh
 ```
 
-Upon completion, the best checkpoint (lowest validation loss) is saved under `models/soacer_20sent/`.
+To customize settings (e.g., change model or output directory), override variables like this:
+
+```bash
+MODEL_ID="deepseek-ai/DeepSeek-R1-Distill-Llama-8B" \
+OUTPUT_DIR="embeddings/deepseek_run" \
+MAX_LEN=1024 \
+BATCH_SIZE=8 \
+bash scripts/classification/generate_embeddings.sh
+```
+
+This will generate embeddings for the train/validation/test splits and save them under your specified output directory (default: `embeddings/model_embeddings`).
+
+---
+
+### Step 2: Train Classifier
+
+After embeddings are generated, train a **classification head** (a 2-layer MLP) on top of them.
+
+```bash
+bash scripts/classification/train_classifier.sh
+```
+
+You can adjust the classifier hyperparameters and training settings by editing the variables inside the script, such as:
+
+* `MODEL_VARIANT="llama3-8b"`
+* `EMBED_SIZE=4096`
+* `COMMON_DIM=512`
+* `EPOCHS=10`
+* `BATCH_SIZE=32`
+* `LEARNING_RATE=1e-4`
+
+By default, the training uses:
+
+* Embeddings from: `classification/embeddings/model_embeddings/Meta-Llama-3-8B`
+* Output results to: `classification/results/`
+
+The best model (lowest validation loss) is saved automatically. Training logs and evaluation metrics are recorded under `wandb_logs/`.
+
+
 
 ### 3. Ablation Study (Full-text vs. Summary)
 
