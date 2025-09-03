@@ -258,8 +258,7 @@ This command will:
 
 If you use SoAC or SoACer in your work, please cite:
 
-> Shayesteh, S., Srinath, M., Matheson, L., Xian, L., Saha, S., Giles, C. L., & Wilson, S. (2025).
-> SoAC and SoACer: A Sector-Based Corpus and LLM-Based Framework for Sectoral Website Classification. In *Proceedings of \[Conference Name]*.
+Shahriar Shayesteh, Mukund Srinath, Lee Matheson, Lu Xian, Sinjoy Saha, C. Lee Giles, and Shomir Wilson. 2025. SoAC and SoACer: A Sector-Based Corpus and LLM-Based Framework for Sectoral Website Classification. In Proceedings of the 2025 ACM Symposium on Document Engineering (DocEng '25). Association for Computing Machinery, New York, NY, USA, Article 24, 1–10. https://doi.org/10.1145/3704268.3742691
 
 Full reference details and DOI will be updated once available.
 
